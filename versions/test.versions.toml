@@ -1,0 +1,7 @@
+[versions]
+kotest = "5.5.5"
+mockk = "1.13.4"
+
+[libraries]
+kotest = { group = "io.kotest", name = "kotest-runner-junit5-jvm", version.ref = "kotest" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

@@ -1,0 +1,10 @@
+[versions]
+slf4j = "2.0.6"
+logback = "1.4.5"
+
+[libraries]
+slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+
+[bundles]
+logs = ["slf4jApi", "logbackClassic"]

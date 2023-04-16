@@ -1,0 +1,25 @@
+[versions]
+exposed = "0.41.1"
+h2 = "2.1.214"
+flyway = "9.6.0"
+postgres = "42.5.0"
+hikari = "5.0.1"
+
+[libraries]
+flywayCore = { group = "org.flywaydb", name = "flyway-core", version.ref = "flyway" }
+exposedCore = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposedDao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+exposedJdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+postgresJdbc = { group = "org.postgresql", name = "postgresql", version.ref = "postgres" }
+hikariCP = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikari" }
+
+[bundles]
+exposedWithPostgres = [
+    "flywayCore",
+    "exposedCore",
+    "exposedDao",
+    "exposedJdbc",
+    "postgresJdbc",
+    "hikariCP"
+]

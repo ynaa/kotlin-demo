@@ -1,0 +1,21 @@
+[versions]
+ktor = "2.2.4"
+
+[libraries]
+serverCore = { group = "io.ktor", name = "ktor-server-core-jvm", version.ref = "ktor" }
+serverNetty = { group = "io.ktor", name = "ktor-server-netty-jvm", version.ref = "ktor" }
+
+serializationJson = { group = "io.ktor", name = "ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+serializationXml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml-jvm", version.ref = "ktor" }
+serverStatus = { group = "io.ktor", name = "ktor-server-status-pages-jvm", version.ref = "ktor" }
+serverContentNegotiation = { group = "io.ktor", name = "ktor-server-content-negotiation-jvm", version.ref = "ktor" }
+
+clientSerialization = { group = "io.ktor", name = "ktor-client-content-negotiation-jvm", version.ref = "ktor" }
+client = { group = "io.ktor", name = "ktor-client-core-jvm", version.ref = "ktor" }
+cio = { group = "io.ktor", name = "ktor-client-cio-jvm", version.ref = "ktor" }
+
+
+[bundles]
+ktorServerBundle = ["serverCore", "serverNetty", "serverContentNegotiation", "serverStatus"]
+ktorClientBundle = ["client", "cio", "clientSerialization"]
+#
