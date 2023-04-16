@@ -9,6 +9,6 @@ front-url:
 get http://localhost:8080/front/customers
 post http://localhost:8080/front/customers
 get http://localhost:8080/front/accounts/1
-get http://localhost:8080/front/transactionsIn/12345678910
-get http://localhost:8080/front/transactionsOut/92345678910
+get http://localhost:8080/front/transactionsIn/92345678910
+get http://localhost:8080/front/transactionsOut/12345678910
 post http://localhost:8080/front/transfer

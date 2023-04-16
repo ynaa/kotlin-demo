@@ -33,7 +33,6 @@ fun Route.defineRoutes(controller: RestController, path: String) {
         get("/customers") { controller.listCustomers(call) }
         post("/customer") { controller.createCustomer(call) }
         get("/accounts/{customerId}") { controller.accounts(call) }
-        get("/transfer") { controller.transfer(call) }
         get("/transactionsIn/{accountNumber}") { controller.incomingTransactions(call) }
         get("/transactionsOut/{accountNumber}") { controller.outgoingTransactions(call) }
         post("/transfer") { controller.transfer(call) }
