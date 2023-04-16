@@ -6,6 +6,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
+import no.miles.kotlindemo.bank.exceptions.exceptionHandler
 
 fun ktorServer(
     controller: Controller,
@@ -14,6 +15,7 @@ fun ktorServer(
         install(ContentNegotiation) {
             xml()
         }
+        exceptionHandler()
         routing {
             defineRoutes(controller, "bank")
         }
@@ -22,11 +24,11 @@ fun ktorServer(
 
 fun Route.defineRoutes(controller: Controller, contextPath: String) {
     route("/$contextPath") {
-        get("/customers", controller.listCustomers)
-        post("/customers", controller.createCustomer)
-        get("/accounts/{customerId}", controller.getAccounts)
-        get("/transactionsIn/{accountNumber}", controller.getIncomingTransactions)
-        get("/transactionsOut/{accountNumber}", controller.getOutgoingTransactions)
-        post("/transfer", controller.transfer)
+        get("/customers") { controller.listCustomers(call) }
+        post("/customers") { controller.createCustomer(call) }
+        get("/accounts/{customerId}") { controller.getAccounts(call) }
+        get("/transactionsIn/{accountNumber}") { controller.getIncomingTransactions(call) }
+        get("/transactionsOut/{accountNumber}") { controller.getOutgoingTransactions(call) }
+        post("/transfer") { controller.transfer(call) }
     }
 }

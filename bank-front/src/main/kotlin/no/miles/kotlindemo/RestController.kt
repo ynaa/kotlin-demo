@@ -10,7 +10,7 @@ import io.ktor.server.response.*
 import no.miles.kotlindemo.bank.Account
 import no.miles.kotlindemo.bank.Customer
 import no.miles.kotlindemo.bank.Transaction
-import no.miles.kotlindemo.bankdb.common.callHandler
+import no.miles.kotlindemo.bank.exceptions.BadRequestApiException
 
 class RestController(private val client: HttpClient) {
 
@@ -21,7 +21,7 @@ class RestController(private val client: HttpClient) {
     private val outgoingTransactionUrl = "$baseUrl/transactionsOut"
     private val transferUrl = "$baseUrl/transfer"
 
-    val listCustomers = callHandler {
+    suspend fun listCustomers(call: ApplicationCall) {
         val customers: List<Customer> = client.get(customerUrl).body()
         val populatedCustomer = customers.map {
             it.copy(accounts = getAccounts(it.id))
@@ -29,7 +29,7 @@ class RestController(private val client: HttpClient) {
         call.respond(populatedCustomer)
     }
 
-    val createCustomer = callHandler {
+    suspend fun createCustomer(call: ApplicationCall) {
         val customer = call.receive<Customer>()
         client.post(customerUrl){
             contentType(ContentType.Application.Xml)
@@ -38,52 +38,31 @@ class RestController(private val client: HttpClient) {
         call.respondText("Customer stored correctly with id ${customer.id}", status = HttpStatusCode.Created)
     }
 
-    suspend fun createCustomerIt(call: ApplicationCall) {
-        val customer = call.receive<Customer>()
-        client.post(customerUrl){
-            contentType(ContentType.Application.Xml)
-            setBody(customer)
-        }
-        call.respondText("Customer stored correctly with id ${customer.id}", status = HttpStatusCode.Created)
-    }
-
-    val accounts = callHandler {
+    suspend fun accounts(call: ApplicationCall) {
         val customerId = call.parameters["customerId"]?.toInt()
         val accounts: List<Account> = getAccounts(customerId)
         call.respond(accounts)
     }
 
-    val transfer = callHandler {
+    suspend fun transfer(call: ApplicationCall) {
         val transaction = call.receive<Transaction>()
         val transactionResult = client.post(transferUrl){
             contentType(ContentType.Application.Xml)
             setBody(transaction)
         }
         when(transactionResult.status){
-            HttpStatusCode.BadRequest ->  call.respondText(transactionResult.body(), status = HttpStatusCode.BadRequest)
-            HttpStatusCode.OK -> call.respondText("transaction registerd", status = HttpStatusCode.Created)
+            HttpStatusCode.BadRequest -> throw BadRequestApiException(transactionResult.body())
+            HttpStatusCode.OK -> call.respondText("transaction registered", status = HttpStatusCode.Created)
             else ->  call.respondText(transactionResult.body(), status = HttpStatusCode.InternalServerError)
         }
     }
 
-    private suspend fun getAccounts(customerId: Int?): List<Account> {
-        val url = "$accountsUrl/$customerId"
-        val accounts: List<Account> = client.get(url).body()
-        val poplulatedAccounts = accounts.map{
-            it.copy(
-                incomingTransactions = getTransactions(it.accountNumber, incomingTransactionUrl),
-                outgoingTransactions = getTransactions(it.accountNumber, outgoingTransactionUrl),
-            )
-        }
-        return poplulatedAccounts
-    }
-
-    val incomingTransactions = callHandler {
+    suspend fun incomingTransactions(call: ApplicationCall) {
         val accountNumber = call.parameters["accountNumber"]?.toLong()
         call.respond(getTransactions(accountNumber, incomingTransactionUrl))
     }
 
-    val outgoingTransactions = callHandler {
+    suspend fun outgoingTransactions(call: ApplicationCall) {
         val accountNumber = call.parameters["accountNumber"]?.toLong()
         call.respond(getTransactions(accountNumber, outgoingTransactionUrl))
     }
@@ -93,4 +72,14 @@ class RestController(private val client: HttpClient) {
         return client.get(url).body()
     }
 
+    private suspend fun getAccounts(customerId: Int?): List<Account> {
+        val url = "$accountsUrl/$customerId"
+        val accounts: List<Account> = client.get(url).body()
+        return accounts.map{
+            it.copy(
+                incomingTransactions = getTransactions(it.accountNumber, incomingTransactionUrl),
+                outgoingTransactions = getTransactions(it.accountNumber, outgoingTransactionUrl),
+            )
+        }
+    }
 }

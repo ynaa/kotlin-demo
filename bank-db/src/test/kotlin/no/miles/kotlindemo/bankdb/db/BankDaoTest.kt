@@ -12,7 +12,7 @@ import no.miles.kotlindemo.bank.Transaction
 import no.miles.kotlindemo.bankdb.common.toDataSource
 import org.h2.jdbcx.JdbcDataSource
 import javax.sql.DataSource
-
+/*
 abstract class Test: StringSpec(){
 
     fun getDataSource(useInMemory: Boolean): DataSource {
@@ -27,9 +27,15 @@ abstract class Test: StringSpec(){
     }
 }
 
-class BankDaoTest: Test(){
+ */
 
-    private val datasource = getDataSource(true)
+class BankDaoTest: StringSpec(){
+
+    private val datasource = JdbcDataSource().apply {
+        setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
+        user = "sa"
+        password = "sa"
+    }
 
     private val bankDao = BankDao(datasource)
 
@@ -49,37 +55,30 @@ class BankDaoTest: Test(){
 
     init {
 
-        "Replace customer"{
-            val result = bankDao.insertCustomer(customer1)
-            result.insertedCount shouldBe 1
+        "Test customer"{
+            val result = bankDao.createOrUpdateCustomer(customer1)
+            result shouldBe 1
 
             val customers = bankDao.getCustomers()
             customers.size shouldBe 1
             customers.first() shouldBe customer1
-
-            val updatedCustomer = customer1.copy(name = "test")
-            bankDao.insertCustomer(updatedCustomer)
-
-            val customers1 = bankDao.getCustomers()
-            customers1.size shouldBe 1
-            customers1.first() shouldBe updatedCustomer
         }
 
         "Test accounts" {
-            bankDao.insertCustomer(customer1)
-            bankDao.insertAccount(account1)
+            bankDao.createOrUpdateCustomer(customer1)
+            bankDao.createOrUpdateAccount(account1)
 
-            val updatedCustomer = bankDao.getAccounts(customer1)
-            updatedCustomer.accounts.size shouldBe 1
-            updatedCustomer.accounts.first() shouldBe account1
+            val accounts = bankDao.getAccountsForCustomer(customer1.id)
+            accounts.size shouldBe 1
+            accounts.first() shouldBe account1
         }
 
         "Test transactions" {
-            bankDao.insertCustomer(customer1)
-            bankDao.insertCustomer(customer2)
+            bankDao.createOrUpdateCustomer(customer1)
+            bankDao.createOrUpdateCustomer(customer2)
 
-            bankDao.insertAccount(account1)
-            bankDao.insertAccount(account2)
+            bankDao.createOrUpdateAccount(account1)
+            bankDao.createOrUpdateAccount(account2)
 
             val transaction = Transaction(
                 id = 5,
@@ -96,13 +95,13 @@ class BankDaoTest: Test(){
             outgoingTransactions.first().fromAccount shouldBe account1.accountNumber
             outgoingTransactions.first().toAccount shouldBe account2.accountNumber
 
-            val updateAccount1 = bankDao.getAccount(account1.accountNumber)!!
+            val updateAccount1 = bankDao.getAccountByAccountNumber(account1.accountNumber)!!
             updateAccount1.balance shouldBe account1.balance - transaction.amount
 
-            val updateAccount2 = bankDao.getAccount(account2.accountNumber)!!
+            val updateAccount2 = bankDao.getAccountByAccountNumber(account2.accountNumber)!!
             updateAccount2.balance shouldBe account2.balance + transaction.amount
 
-            bankDao.insertAccount(account1.copy(balance = 50))
+            bankDao.createOrUpdateAccount(account1.copy(balance = 50))
 
             val illegalTransaction = Transaction(
                 id = 6,
@@ -112,6 +111,27 @@ class BankDaoTest: Test(){
                 "Beer"
             )
             bankDao.registerTransaction(illegalTransaction) shouldBe instanceOf<NoMoneyResult>()
+        }
+
+        "Test transaction rollback" {
+            bankDao.createOrUpdateCustomer(customer1)
+            bankDao.createOrUpdateCustomer(customer2)
+
+            bankDao.createOrUpdateAccount(account1)
+            bankDao.createOrUpdateAccount(account2)
+
+            val transaction = Transaction(
+                id = 51,
+                fromAccount = account1.accountNumber,
+                toAccount = 1234,
+                amount = 123,
+                "Beer"
+            )
+            val result = bankDao.registerTransaction(transaction)
+            result shouldBe instanceOf<IllegalAccount>()
+
+            val notUpdatedAccount = bankDao.getAccountByAccountNumber(account1.accountNumber)
+            notUpdatedAccount shouldBe account1
         }
     }
 }

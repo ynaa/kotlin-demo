@@ -2,8 +2,6 @@ package no.miles.kotlindemo.bankdb.common
 
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.application.*
-import io.ktor.util.pipeline.*
 import javax.sql.DataSource
 
 const val enppoint_health_liveness = "/health/liveness"
@@ -21,13 +19,5 @@ fun Config.toDataSource(): DataSource =
         }
     }
 
-
 fun <C> Config.loadConfig(name: String, load: Config.() -> C): C =
     getConfig(name).load()
-
-
-inline fun callHandler(
-    crossinline callFun: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit
-): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit = {
-    callFun()
-}

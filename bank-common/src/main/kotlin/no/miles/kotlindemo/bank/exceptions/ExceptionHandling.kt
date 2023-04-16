@@ -1,4 +1,4 @@
-package no.miles.kotlindemo.exceptions
+package no.miles.kotlindemo.bank.exceptions
 
 import io.ktor.http.*
 import io.ktor.server.application.Application
@@ -15,9 +15,6 @@ fun Application.exceptionHandler() {
     install(StatusPages) {
         exception<BadRequestApiException> { call, error ->
             call.exResponse(HttpStatusCode.BadRequest, error)
-        }
-        exception<NotFoundApiException> { call, error ->
-            call.exResponse(HttpStatusCode.NotFound, error)
         }
         exception<Exception> { call, error ->
             call.exResponse(HttpStatusCode.InternalServerError, error)

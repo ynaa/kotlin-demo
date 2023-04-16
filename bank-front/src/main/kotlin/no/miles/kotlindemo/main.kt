@@ -8,8 +8,8 @@ val log: Logger = LoggerFactory.getLogger("adapter")
 fun main() {
     log.info("Starting server")
 
-    val demoApp = FrontApp()
-    demoApp.start()
+    val frontApp = FrontApp()
+    frontApp.start()
 }
 
 

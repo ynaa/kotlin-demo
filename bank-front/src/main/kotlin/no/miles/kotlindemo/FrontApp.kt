@@ -5,25 +5,28 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.xml.*
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 class FrontApp {
 
-    private val logger: Logger = LoggerFactory.getLogger("adapter")
+    /*
+    import io.ktor.client.engine.java.*
+    private val javaClient = HttpClient(Java){
+        install(ContentNegotiation) {
+            xml()
+        }
+    }
+     */
 
-    private val client = HttpClient(CIO){
+    private val cioClient = HttpClient(CIO){
         install(ContentNegotiation) {
             xml()
         }
     }
 
-    private val restController = RestController(client)
+    private val restController = RestController(cioClient)
     private val nettyServer = ktorServer(restController, 8080)
 
     fun start() {
         nettyServer.start(wait = true)
-        logger.info("Are we here?")
     }
 }
 

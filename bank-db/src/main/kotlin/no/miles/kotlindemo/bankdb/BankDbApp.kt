@@ -4,7 +4,6 @@ import no.miles.kotlindemo.bank.Account
 import no.miles.kotlindemo.bank.Customer
 import no.miles.kotlindemo.bank.Transaction
 import no.miles.kotlindemo.bankdb.db.BankDao
-import org.jetbrains.exposed.sql.Except
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,10 +37,10 @@ class BankDbApp(private val dataSource: DataSource) {
         val account1 = Account(3, "brukskonto", customer1.id, accNr1, 1000)
         val account2 = Account(4, "brukskonto", customer2.id, accNr2, 1000)
 
-        bankDao.insertCustomer(customer1)
-        bankDao.insertCustomer(customer2)
-        bankDao.insertAccount(account1)
-        bankDao.insertAccount(account2)
+        bankDao.createOrUpdateCustomer(customer1)
+        bankDao.createOrUpdateCustomer(customer2)
+        bankDao.createOrUpdateAccount(account1)
+        bankDao.createOrUpdateAccount(account2)
 
         val transaction = Transaction(
             id = 5,

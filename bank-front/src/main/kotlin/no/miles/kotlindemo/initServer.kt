@@ -6,9 +6,9 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
+import no.miles.kotlindemo.bank.exceptions.exceptionHandler
 import no.miles.kotlindemo.bankdb.common.endpoint_health_readiness
 import no.miles.kotlindemo.bankdb.common.enppoint_health_liveness
-import no.miles.kotlindemo.exceptions.exceptionHandler
 import no.miles.kotlindemo.health.CheckType
 import no.miles.kotlindemo.health.defineHealthEndpoint
 
@@ -21,34 +21,21 @@ fun ktorServer(
         }
         exceptionHandler()
         routing {
-            //defineFrontRoutes(restController, "front")
+            defineRoutes(restController, "front")
             defineHealthEndpoint(enppoint_health_liveness, CheckType.Liveness)
             defineHealthEndpoint(endpoint_health_readiness, CheckType.Readiness)
-            defineRouting(restController, "front")
         }
     }
 )
 
-fun Routing.defineRouting(controller: RestController, contextPath: String) {
-    get("/$contextPath/customers", controller.listCustomers)
-    //post("/customer", controller.createCustomer)
-    get("/$contextPath/accounts/{customerId}", controller.accounts)
-    get("/$contextPath/transfer", controller.transfer)
-    get("/$contextPath/transactionsIn/{accountNumber}", controller.incomingTransactions)
-    get("/$contextPath/transactionsOut/{accountNumber}", controller.outgoingTransactions)
-    post("/$contextPath/transfer", controller.transfer)
-
-    post("/$contextPath/customer") { controller.createCustomerIt(call) }
-}
-
-fun Route.defineFrontRoutes(controller: RestController, contextPath: String) {
-    route("/$contextPath") {
-        get("/customers", controller.listCustomers)
-        post("/customer", controller.createCustomer)
-        get("/accounts/{customerId}", controller.accounts)
-        get("/transfer", controller.transfer)
-        get("/transactionsIn/{accountNumber}", controller.incomingTransactions)
-        get("/transactionsOut/{accountNumber}", controller.outgoingTransactions)
-        post("/transfer", controller.transfer)
+fun Route.defineRoutes(controller: RestController, path: String) {
+    route("/$path") {
+        get("/customers") { controller.listCustomers(call) }
+        post("/customer") { controller.createCustomer(call) }
+        get("/accounts/{customerId}") { controller.accounts(call) }
+        get("/transfer") { controller.transfer(call) }
+        get("/transactionsIn/{accountNumber}") { controller.incomingTransactions(call) }
+        get("/transactionsOut/{accountNumber}") { controller.outgoingTransactions(call) }
+        post("/transfer") { controller.transfer(call) }
     }
 }
