@@ -26,10 +26,12 @@ class RestController(private val client: HttpClient) {
         val populatedCustomer = customers.map {
             it.copy(accounts = getAccounts(it.id))
         }
+        //Converts object to correct content-format
         call.respond(populatedCustomer)
     }
 
     suspend fun createCustomer(call: ApplicationCall) {
+        //receiving and converting content for a request
         val customer = call.receive<Customer>()
         client.post(customerUrl){
             contentType(ContentType.Application.Xml)
@@ -52,7 +54,7 @@ class RestController(private val client: HttpClient) {
         }
         when(transactionResult.status){
             HttpStatusCode.BadRequest -> throw BadRequestApiException(transactionResult.body())
-            HttpStatusCode.OK -> call.respondText("transaction registered", status = HttpStatusCode.Created)
+            HttpStatusCode.Created, HttpStatusCode.OK -> call.respondText("transaction registered", status = HttpStatusCode.Created)
             else ->  call.respondText(transactionResult.body(), status = HttpStatusCode.InternalServerError)
         }
     }

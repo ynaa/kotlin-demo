@@ -2,6 +2,14 @@
 
 Run docker-compose up -d
 
+BankApp
+ - rest-api for database operations
+ - talks to the database
+
+FrontApp
+ - rest-api for "frontend"
+
+
 Start bank-db, run main.kt
 Start bank-front, run main.kt
 

@@ -26,6 +26,6 @@ private suspend fun ApplicationCall.exResponse(
     statusCode: HttpStatusCode,
     ex: Exception
 ) {
-    apiExceptionLogger.info("HTTP $statusCode due to: ${ex.message}", ex)
+    apiExceptionLogger.info("HTTP $statusCode due to: ${ex.message}")
     respond(statusCode, ex.message ?: "")
 }

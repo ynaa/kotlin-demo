@@ -21,6 +21,7 @@ class BankDao(datasource: DataSource) {
         .load()
 
     fun createOrUpdateCustomer(customer: Customer): Int {
+
         val existing = getCustomer(customer.id)
         return if(existing == null){
             insert(customer).insertedCount
@@ -31,23 +32,22 @@ class BankDao(datasource: DataSource) {
     }
 
     private fun getCustomer(customerId: Int) = transaction(database)  {
-        CustomerTable
-            .select((CustomerTable.id eq customerId))
+        CustomerTable.select(
+                where = (CustomerTable.id eq customerId)
+            )
             .map { it.toCustomer() }
             .firstOrNull()
     }
 
     private fun insert(customer: Customer) = transaction(database)  {
-        CustomerTable
-            .insert {
+        CustomerTable.insert {
                 it[id] = customer.id
                 it[name] = customer.name
             }
     }
 
     private fun updateCustomer(customer: Customer) = transaction(database)  {
-        CustomerTable
-            .update (
+        CustomerTable.update (
                 where = { (CustomerTable.id eq customer.id) }
             ){
                 it[name] = customer.name
@@ -55,24 +55,20 @@ class BankDao(datasource: DataSource) {
     }
 
     fun getCustomers() = transaction(database)  {
-        CustomerTable
-            .selectAll()
+        CustomerTable.selectAll()
             .map { it.toCustomer() }
     }
 
     fun getAccountsForCustomer(customerId: Int) = transaction(database)  {
-        AccountTable
-            .select((AccountTable.owner eq customerId))
+        AccountTable.select((AccountTable.owner eq customerId))
             .map { it.toAccount() }
     }
 
     fun getAccountByAccountNumber(accountNumber: Long) = transaction(database)  {
-        AccountTable
-            .select((AccountTable.accountNumber eq accountNumber))
+        AccountTable.select( where = (AccountTable.accountNumber eq accountNumber))
             .map { it.toAccount() }
             .firstOrNull()
     }
-
 
     fun createOrUpdateAccount(account: Account) {
         val existing = getAccount(account.id)
@@ -113,7 +109,6 @@ class BankDao(datasource: DataSource) {
                 it[balance] = account.balance
             }
     }
-
 
     fun registerTransaction(transaction: Transaction): TransactionResult = transaction(database)  {
         val fromAccount = getAccountByAccountNumber(transaction.fromAccount) ?: return@transaction IllegalAccount
@@ -171,7 +166,8 @@ class BankDao(datasource: DataSource) {
             onColumn = TransactionTable.toAccountNumber,
             otherColumn = AccountTable.accountNumber
         ).slice(
-            TransactionTable.id
+            TransactionTable.id,
+            AccountTable.id
             //Pick fields to return
         ).select(
             (TransactionTable.fromAccountNumber eq account.accountNumber) or
